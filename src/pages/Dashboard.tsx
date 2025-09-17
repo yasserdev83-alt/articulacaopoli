@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProductivityData } from "@/hooks/useProductivityData";
-import { AGENTS } from "@/types";
 import { 
   BarChart3, 
   Users, 
@@ -27,7 +26,7 @@ import {
 } from "recharts";
 
 export function Dashboard() {
-  const { getMetrics, getAgentPerformance, getWeeklyData, loading } = useProductivityData();
+  const { getMetrics, getAgentPerformance, getWeeklyData, loading, agents } = useProductivityData();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter'>('week');
   const [selectedAgent, setSelectedAgent] = useState<string>('all');
   
@@ -62,14 +61,14 @@ export function Dashboard() {
               <UserCheck className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Filtrar por agente" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Agentes</SelectItem>
-              {AGENTS.map((agent) => (
-                <SelectItem key={agent.id} value={agent.id}>
-                  {agent.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
+              <SelectContent>
+                <SelectItem value="all">Todos os Agentes</SelectItem>
+                {agents.map((agent) => (
+                  <SelectItem key={agent.id} value={agent.id}>
+                    {agent.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
           </Select>
           
           {(['week', 'month', 'quarter'] as const).map((period) => (

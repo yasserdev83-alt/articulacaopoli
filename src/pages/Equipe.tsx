@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProductivityData } from "@/hooks/useProductivityData";
-import { LEADERSHIP_ROLES } from "@/types";
 import { 
   Users, 
   Search, 
@@ -17,10 +16,18 @@ import {
 } from "lucide-react";
 
 export function Equipe() {
-  const { getAgentPerformance, records } = useProductivityData();
+  const { getAgentPerformance, records, loading, agents, roles } = useProductivityData();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
   const [sortBy, setSortBy] = useState<'totalUpdates' | 'weeklyUpdates' | 'name'>('totalUpdates');
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const agentPerformance = getAgentPerformance();
 
@@ -41,7 +48,7 @@ export function Equipe() {
     });
 
   const getAgentRecords = (agentName: string) => {
-    return records.filter(record => record.agentName === agentName);
+    return records.filter(record => record.agent?.name === agentName);
   };
 
   const getAgentRoleStats = (agentName: string) => {
@@ -49,8 +56,9 @@ export function Equipe() {
     const roleStats = new Map<string, number>();
     
     agentRecords.forEach(record => {
-      const current = roleStats.get(record.leadershipRoleName) || 0;
-      roleStats.set(record.leadershipRoleName, current + record.updatesCount);
+      const roleName = record.leadership_role?.name || 'Unknown';
+      const current = roleStats.get(roleName) || 0;
+      roleStats.set(roleName, current + record.updates_count);
     });
 
     return Array.from(roleStats.entries())
@@ -100,7 +108,7 @@ export function Equipe() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os cargos</SelectItem>
-                {LEADERSHIP_ROLES.map((role) => (
+                {roles.map((role) => (
                   <SelectItem key={role.id} value={role.id}>
                     {role.name}
                   </SelectItem>

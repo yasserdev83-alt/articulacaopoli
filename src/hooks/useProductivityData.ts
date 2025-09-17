@@ -1,53 +1,72 @@
 import { useState, useEffect } from 'react';
-import { ProductivityRecord, DashboardMetrics, AgentPerformance, AGENTS, LEADERSHIP_ROLES } from '@/types';
-
-// Mock data for demonstration
-const generateMockData = (): ProductivityRecord[] => {
-  const records: ProductivityRecord[] = [];
-  const now = new Date();
-  
-  // Generate data for the last 30 days
-  for (let i = 0; i < 150; i++) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - Math.floor(i / 5));
-    
-    const agent = AGENTS[Math.floor(Math.random() * AGENTS.length)];
-    const role = LEADERSHIP_ROLES[Math.floor(Math.random() * LEADERSHIP_ROLES.length)];
-    
-    records.push({
-      id: `record-${i}`,
-      agentId: agent.id,
-      agentName: agent.name,
-      leadershipRoleId: role.id,
-      leadershipRoleName: role.name,
-      updatesCount: Math.floor(Math.random() * 15) + 1,
-      date: date.toISOString().split('T')[0],
-      createdAt: date.toISOString(),
-    });
-  }
-  
-  return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-};
+import { ProductivityRecord, DashboardMetrics, AgentPerformance, Agent, LeadershipRole } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useProductivityData() {
   const [records, setRecords] = useState<ProductivityRecord[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [roles, setRoles] = useState<LeadershipRole[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setRecords(generateMockData());
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch all data in parallel
+      const [recordsResult, agentsResult, rolesResult] = await Promise.all([
+        supabase
+          .from('productivity_records')
+          .select(`
+            *,
+            agent:agents(*),
+            leadership_role:leadership_roles(*)
+          `)
+          .order('date', { ascending: false }),
+        supabase.from('agents').select('*').order('name'),
+        supabase.from('leadership_roles').select('*').order('name')
+      ]);
+
+      if (recordsResult.error) throw recordsResult.error;
+      if (agentsResult.error) throw agentsResult.error;
+      if (rolesResult.error) throw rolesResult.error;
+
+      setRecords(recordsResult.data || []);
+      setAgents(agentsResult.data || []);
+      setRoles(rolesResult.data || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
-  const addRecord = (record: Omit<ProductivityRecord, 'id' | 'createdAt'>) => {
-    const newRecord: ProductivityRecord = {
-      ...record,
-      id: `record-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    setRecords(prev => [newRecord, ...prev]);
+  const addRecord = async (record: Omit<ProductivityRecord, 'id' | 'created_at' | 'updated_at' | 'agent' | 'leadership_role'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('productivity_records')
+        .insert([record])
+        .select(`
+          *,
+          agent:agents(*),
+          leadership_role:leadership_roles(*)
+        `)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setRecords(prev => [data, ...prev]);
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error adding record:', error);
+      return { success: false, error };
+    }
   };
 
   const getMetrics = (period: 'week' | 'month' | 'quarter' = 'week', agentId?: string): DashboardMetrics => {
@@ -71,16 +90,17 @@ export function useProductivityData() {
     const filteredRecords = records.filter(record => {
       const recordDate = new Date(record.date);
       const dateMatches = recordDate >= startDate;
-      const agentMatches = !agentId || record.agentId === agentId;
+      const agentMatches = !agentId || record.agent_id === agentId;
       return dateMatches && agentMatches;
     });
 
-    const totalUpdates = filteredRecords.reduce((sum, record) => sum + record.updatesCount, 0);
+    const totalUpdates = filteredRecords.reduce((sum, record) => sum + record.updates_count, 0);
     const agentStats = new Map<string, number>();
     
     filteredRecords.forEach(record => {
-      const current = agentStats.get(record.agentName) || 0;
-      agentStats.set(record.agentName, current + record.updatesCount);
+      const agentName = record.agent?.name || 'Unknown';
+      const current = agentStats.get(agentName) || 0;
+      agentStats.set(agentName, current + record.updates_count);
     });
 
     const topPerformerEntry = Array.from(agentStats.entries())
@@ -110,29 +130,30 @@ export function useProductivityData() {
 
     records.forEach(record => {
       const recordDate = new Date(record.date);
-      const current = agentStats.get(record.agentName) || {
+      const agentName = record.agent?.name || 'Unknown';
+      const current = agentStats.get(agentName) || {
         totalUpdates: 0,
         weeklyUpdates: 0,
         lastUpdate: '',
         records: [],
       };
 
-      current.totalUpdates += record.updatesCount;
+      current.totalUpdates += record.updates_count;
       current.records.push(record);
       
       if (recordDate >= weekAgo) {
-        current.weeklyUpdates += record.updatesCount;
+        current.weeklyUpdates += record.updates_count;
       }
       
       if (!current.lastUpdate || recordDate > new Date(current.lastUpdate)) {
         current.lastUpdate = record.date;
       }
 
-      agentStats.set(record.agentName, current);
+      agentStats.set(agentName, current);
     });
 
     return Array.from(agentStats.entries()).map(([agentName, stats]) => {
-      const agent = AGENTS.find(a => a.name === agentName);
+      const agent = agents.find(a => a.name === agentName);
       return {
         agentId: agent?.id || '',
         agentName,
@@ -158,8 +179,9 @@ export function useProductivityData() {
       }
       
       const weekData = weeklyStats.get(weekKey)!;
-      const current = weekData.get(record.agentName) || 0;
-      weekData.set(record.agentName, current + record.updatesCount);
+      const agentName = record.agent?.name || 'Unknown';
+      const current = weekData.get(agentName) || 0;
+      weekData.set(agentName, current + record.updates_count);
     });
 
     return Array.from(weeklyStats.entries())
@@ -176,10 +198,13 @@ export function useProductivityData() {
 
   return {
     records,
+    agents,
+    roles,
     loading,
     addRecord,
     getMetrics,
     getAgentPerformance,
     getWeeklyData,
+    refetch: fetchData,
   };
 }

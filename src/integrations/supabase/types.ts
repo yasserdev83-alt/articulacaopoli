@@ -14,7 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agents: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      leadership_roles: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      productivity_records: {
+        Row: {
+          agent_id: string
+          created_at: string
+          date: string
+          id: string
+          leadership_role_id: string
+          updated_at: string
+          updates_count: number
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          date: string
+          id?: string
+          leadership_role_id: string
+          updated_at?: string
+          updates_count: number
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          leadership_role_id?: string
+          updated_at?: string
+          updates_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "productivity_records_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productivity_records_leadership_role_id_fkey"
+            columns: ["leadership_role_id"]
+            isOneToOne: false
+            referencedRelation: "leadership_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

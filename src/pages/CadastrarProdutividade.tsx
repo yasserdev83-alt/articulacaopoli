@@ -8,14 +8,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useProductivityData } from "@/hooks/useProductivityData";
 import { useToast } from "@/hooks/use-toast";
-import { AGENTS, LEADERSHIP_ROLES } from "@/types";
 import { CalendarIcon, Plus, Save } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
 export function CadastrarProdutividade() {
-  const { addRecord } = useProductivityData();
+  const { addRecord, agents, roles, loading } = useProductivityData();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
@@ -52,30 +51,30 @@ export function CadastrarProdutividade() {
     setIsSubmitting(true);
 
     try {
-      const agent = AGENTS.find(a => a.id === formData.agentId);
-      const role = LEADERSHIP_ROLES.find(r => r.id === formData.leadershipRoleId);
-
-      addRecord({
-        agentId: formData.agentId,
-        agentName: agent?.name || "",
-        leadershipRoleId: formData.leadershipRoleId,
-        leadershipRoleName: role?.name || "",
-        updatesCount,
+      const result = await addRecord({
+        agent_id: formData.agentId,
+        leadership_role_id: formData.leadershipRoleId,
+        updates_count: updatesCount,
         date: formData.date.toISOString().split('T')[0],
       });
 
-      toast({
-        title: "Sucesso!",
-        description: `Produtividade de ${agent?.name} registrada com sucesso.`,
-      });
+      if (result.success) {
+        const agent = agents.find(a => a.id === formData.agentId);
+        toast({
+          title: "Sucesso!",
+          description: `Produtividade de ${agent?.name} registrada com sucesso.`,
+        });
 
-      // Reset form
-      setFormData({
-        agentId: "",
-        leadershipRoleId: "",
-        updatesCount: "",
-        date: new Date(),
-      });
+        // Reset form
+        setFormData({
+          agentId: "",
+          leadershipRoleId: "",
+          updatesCount: "",
+          date: new Date(),
+        });
+      } else {
+        throw new Error('Failed to save record');
+      }
     } catch (error) {
       toast({
         title: "Erro",
@@ -86,6 +85,14 @@ export function CadastrarProdutividade() {
       setIsSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -117,13 +124,13 @@ export function CadastrarProdutividade() {
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o agente" />
                 </SelectTrigger>
-                <SelectContent>
-                  {AGENTS.map((agent) => (
-                    <SelectItem key={agent.id} value={agent.id}>
-                      {agent.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                  <SelectContent>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
               </Select>
             </div>
 
@@ -137,13 +144,13 @@ export function CadastrarProdutividade() {
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o cargo" />
                 </SelectTrigger>
-                <SelectContent>
-                  {LEADERSHIP_ROLES.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
               </Select>
             </div>
 

@@ -1,22 +1,26 @@
 export interface Agent {
   id: string;
   name: string;
+  created_at?: string;
 }
 
 export interface LeadershipRole {
   id: string;
   name: string;
+  created_at?: string;
 }
 
 export interface ProductivityRecord {
   id: string;
-  agentId: string;
-  agentName: string;
-  leadershipRoleId: string;
-  leadershipRoleName: string;
-  updatesCount: number;
+  agent_id: string;
+  leadership_role_id: string;
+  updates_count: number;
   date: string;
-  createdAt: string;
+  created_at: string;
+  updated_at?: string;
+  // Joined fields
+  agent?: Agent;
+  leadership_role?: LeadershipRole;
 }
 
 export interface DashboardMetrics {
@@ -42,27 +46,3 @@ export interface WeeklyData {
   week: string;
   [agentName: string]: string | number;
 }
-
-// Constants
-export const AGENTS: Agent[] = [
-  { id: '1', name: 'Monica' },
-  { id: '2', name: 'Marina' },
-  { id: '3', name: 'Ana Paula' },
-  { id: '4', name: 'Elisangela' },
-  { id: '5', name: 'Karla' },
-  { id: '6', name: 'Jessica' },
-  { id: '7', name: 'Silvana' },
-  { id: '8', name: 'Rosa Maria' },
-];
-
-export const LEADERSHIP_ROLES: LeadershipRole[] = [
-  { id: '1', name: 'Prefeito' },
-  { id: '2', name: 'Vice-Prefeito' },
-  { id: '3', name: 'Ex Prefeito' },
-  { id: '4', name: 'Cand. Prefeito' },
-  { id: '5', name: 'Vereador' },
-  { id: '6', name: 'Suplente Vereador' },
-  { id: '7', name: 'Lideranças' },
-  { id: '8', name: 'Dep. Estadual' },
-  { id: '9', name: 'Dep. Federal' },
-];
