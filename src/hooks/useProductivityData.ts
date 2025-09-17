@@ -50,7 +50,7 @@ export function useProductivityData() {
     setRecords(prev => [newRecord, ...prev]);
   };
 
-  const getMetrics = (period: 'week' | 'month' | 'quarter' = 'week'): DashboardMetrics => {
+  const getMetrics = (period: 'week' | 'month' | 'quarter' = 'week', agentId?: string): DashboardMetrics => {
     const now = new Date();
     let startDate = new Date();
     
@@ -70,7 +70,9 @@ export function useProductivityData() {
 
     const filteredRecords = records.filter(record => {
       const recordDate = new Date(record.date);
-      return recordDate >= startDate;
+      const dateMatches = recordDate >= startDate;
+      const agentMatches = !agentId || record.agentId === agentId;
+      return dateMatches && agentMatches;
     });
 
     const totalUpdates = filteredRecords.reduce((sum, record) => sum + record.updatesCount, 0);

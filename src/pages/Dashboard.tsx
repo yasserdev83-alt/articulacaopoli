@@ -2,14 +2,17 @@ import { useState } from "react";
 import { MetricCard } from "@/components/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProductivityData } from "@/hooks/useProductivityData";
+import { AGENTS } from "@/types";
 import { 
   BarChart3, 
   Users, 
   TrendingUp, 
   Award,
   Calendar,
-  Filter
+  Filter,
+  UserCheck
 } from "lucide-react";
 import {
   BarChart,
@@ -26,6 +29,7 @@ import {
 export function Dashboard() {
   const { getMetrics, getAgentPerformance, getWeeklyData, loading } = useProductivityData();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter'>('week');
+  const [selectedAgent, setSelectedAgent] = useState<string>('all');
   
   if (loading) {
     return (
@@ -35,7 +39,7 @@ export function Dashboard() {
     );
   }
 
-  const metrics = getMetrics(selectedPeriod);
+  const metrics = getMetrics(selectedPeriod, selectedAgent === 'all' ? undefined : selectedAgent);
   const agentPerformance = getAgentPerformance();
   const weeklyData = getWeeklyData();
 
@@ -53,6 +57,21 @@ export function Dashboard() {
         </div>
         
         <div className="flex gap-2">
+          <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+            <SelectTrigger className="w-48">
+              <UserCheck className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filtrar por agente" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Agentes</SelectItem>
+              {AGENTS.map((agent) => (
+                <SelectItem key={agent.id} value={agent.id}>
+                  {agent.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
           {(['week', 'month', 'quarter'] as const).map((period) => (
             <Button
               key={period}
@@ -135,6 +154,11 @@ export function Dashboard() {
                     stroke={`hsl(${214 + index * 30}, 84%, ${56 + index * 5}%)`}
                     strokeWidth={2}
                     dot={{ r: 4 }}
+                    label={{
+                      position: 'top',
+                      fill: `hsl(${214 + index * 30}, 84%, ${56 + index * 5}%)`,
+                      fontSize: 12
+                    }}
                   />
                 ))}
               </LineChart>
@@ -166,6 +190,7 @@ export function Dashboard() {
                   dataKey="totalUpdates" 
                   fill="hsl(var(--primary))"
                   radius={[0, 4, 4, 0]}
+                  label={{ position: 'right', fill: 'hsl(var(--primary))', fontSize: 12 }}
                 />
               </BarChart>
             </ResponsiveContainer>
