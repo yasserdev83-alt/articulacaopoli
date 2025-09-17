@@ -139,11 +139,11 @@ export function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis 
                   dataKey="week" 
-                  tickFormatter={(value) => new Date(value).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                  tickFormatter={(value) => new Date(value + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                 />
                 <YAxis />
                 <Tooltip 
-                  labelFormatter={(value) => new Date(value).toLocaleDateString('pt-BR')}
+                  labelFormatter={(value) => new Date(value + 'T00:00:00').toLocaleDateString('pt-BR')}
                 />
                 {agentPerformance.slice(0, 4).map((agent, index) => (
                   <Line
@@ -263,7 +263,7 @@ export function Dashboard() {
                     {agent.totalUpdates} total
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Última: {new Date(agent.lastUpdate).toLocaleDateString('pt-BR')}
+                    Última: {new Date(agent.lastUpdate + 'T00:00:00').toLocaleDateString('pt-BR')}
                   </p>
                 </div>
               </div>

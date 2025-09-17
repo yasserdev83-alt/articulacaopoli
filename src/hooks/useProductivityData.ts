@@ -88,7 +88,8 @@ export function useProductivityData() {
     startDate.setHours(0, 0, 0, 0);
 
     const filteredRecords = records.filter(record => {
-      const recordDate = new Date(record.date);
+      // Use record.date (data da atualização) e força timezone local
+      const recordDate = new Date(record.date + 'T00:00:00');
       const dateMatches = recordDate >= startDate;
       const agentMatches = !agentId || record.agent_id === agentId;
       return dateMatches && agentMatches;
@@ -122,6 +123,7 @@ export function useProductivityData() {
       totalUpdates: number;
       weeklyUpdates: number;
       lastUpdate: string;
+      lastUpdateDate: string;
       records: ProductivityRecord[];
     }>();
 
@@ -129,12 +131,14 @@ export function useProductivityData() {
     weekAgo.setDate(weekAgo.getDate() - 7);
 
     records.forEach(record => {
-      const recordDate = new Date(record.date);
+      // Use record.date (data da atualização) para comparações
+      const recordDate = new Date(record.date + 'T00:00:00'); // Força timezone local
       const agentName = record.agent?.name || 'Unknown';
       const current = agentStats.get(agentName) || {
         totalUpdates: 0,
         weeklyUpdates: 0,
         lastUpdate: '',
+        lastUpdateDate: '',
         records: [],
       };
 
@@ -145,8 +149,10 @@ export function useProductivityData() {
         current.weeklyUpdates += record.updates_count;
       }
       
-      if (!current.lastUpdate || recordDate > new Date(current.lastUpdate)) {
-        current.lastUpdate = record.date;
+      // Use sempre o record.date (data da atualização) para lastUpdate
+      if (!current.lastUpdateDate || record.date > current.lastUpdateDate) {
+        current.lastUpdate = record.updated_at || record.created_at;
+        current.lastUpdateDate = record.date;
       }
 
       agentStats.set(agentName, current);
@@ -160,7 +166,7 @@ export function useProductivityData() {
         totalUpdates: stats.totalUpdates,
         weeklyUpdates: stats.weeklyUpdates,
         dailyAverage: Math.round(stats.weeklyUpdates / 7),
-        lastUpdate: stats.lastUpdate,
+        lastUpdate: stats.lastUpdateDate, // Use a data da atualização (record.date)
       };
     }).sort((a, b) => b.totalUpdates - a.totalUpdates);
   };
@@ -169,7 +175,8 @@ export function useProductivityData() {
     const weeklyStats = new Map<string, Map<string, number>>();
     
     records.forEach(record => {
-      const date = new Date(record.date);
+      // Use record.date (data da atualização) e força timezone local
+      const date = new Date(record.date + 'T00:00:00');
       const weekStart = new Date(date);
       weekStart.setDate(date.getDate() - date.getDay());
       const weekKey = weekStart.toISOString().split('T')[0];
