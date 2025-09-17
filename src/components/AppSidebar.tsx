@@ -29,16 +29,6 @@ const navigationItems = [
     url: "/equipe",
     icon: Users,
   },
-  {
-    title: "Relatórios",
-    url: "/relatorios",
-    icon: Calendar,
-  },
-  {
-    title: "Performance",
-    url: "/performance",
-    icon: TrendingUp,
-  },
 ];
 
 export function AppSidebar() {

@@ -35,7 +35,7 @@ export function Dashboard() {
     );
   }
 
-  const metrics = getMetrics();
+  const metrics = getMetrics(selectedPeriod);
   const agentPerformance = getAgentPerformance();
   const weeklyData = getWeeklyData();
 
@@ -71,7 +71,11 @@ export function Dashboard() {
         <MetricCard
           title="Total de Atualizações"
           value={metrics.totalUpdates.toLocaleString()}
-          description="Esta semana"
+          description={
+            selectedPeriod === 'week' ? 'Esta semana' : 
+            selectedPeriod === 'month' ? 'Este mês' : 
+            'Este trimestre'
+          }
           icon={BarChart3}
           trend={{ value: 12, isPositive: true }}
         />
@@ -85,7 +89,11 @@ export function Dashboard() {
         <MetricCard
           title="Média por Agente"
           value={metrics.averageUpdatesPerAgent}
-          description="Atualizações/semana"
+          description={
+            selectedPeriod === 'week' ? 'Atualizações/semana' : 
+            selectedPeriod === 'month' ? 'Atualizações/mês' : 
+            'Atualizações/trimestre'
+          }
           icon={TrendingUp}
           trend={{ value: 5, isPositive: true }}
         />

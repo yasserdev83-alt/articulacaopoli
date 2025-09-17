@@ -50,15 +50,28 @@ export function useProductivityData() {
     setRecords(prev => [newRecord, ...prev]);
   };
 
-  const getMetrics = (dateRange?: { start: Date; end: Date }): DashboardMetrics => {
-    let filteredRecords = records;
+  const getMetrics = (period: 'week' | 'month' | 'quarter' = 'week'): DashboardMetrics => {
+    const now = new Date();
+    let startDate = new Date();
     
-    if (dateRange) {
-      filteredRecords = records.filter(record => {
-        const recordDate = new Date(record.date);
-        return recordDate >= dateRange.start && recordDate <= dateRange.end;
-      });
+    switch (period) {
+      case 'week':
+        startDate.setDate(now.getDate() - now.getDay());
+        break;
+      case 'month':
+        startDate.setDate(1);
+        break;
+      case 'quarter':
+        const currentQuarter = Math.floor(now.getMonth() / 3);
+        startDate.setMonth(currentQuarter * 3, 1);
+        break;
     }
+    startDate.setHours(0, 0, 0, 0);
+
+    const filteredRecords = records.filter(record => {
+      const recordDate = new Date(record.date);
+      return recordDate >= startDate;
+    });
 
     const totalUpdates = filteredRecords.reduce((sum, record) => sum + record.updatesCount, 0);
     const agentStats = new Map<string, number>();
