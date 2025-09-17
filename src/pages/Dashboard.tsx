@@ -178,39 +178,47 @@ export function Dashboard() {
               <BarChart 
                 data={topAgents} 
                 layout="horizontal"
-                margin={{ top: 10, right: 60, left: 20, bottom: 10 }}
+                margin={{ top: 10, right: 80, left: 20, bottom: 10 }}
               >
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.1} />
                 <XAxis 
                   type="number" 
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  tick={false}
+                  hide
                 />
                 <YAxis 
                   dataKey="agentName" 
                   type="category" 
-                  width={140}
-                  fontSize={12}
+                  width={160}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
+                  tick={{ 
+                    fontSize: 13, 
+                    fill: 'hsl(var(--foreground))',
+                    fontWeight: 500
+                  }}
                 />
                 <Tooltip 
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
+                    backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                   }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
                 />
                 <Bar 
                   dataKey="totalUpdates" 
-                  fill="#60A5FA"
-                  radius={[0, 6, 6, 0]}
-                  label={{ 
-                    position: 'right', 
-                    fill: 'hsl(var(--foreground))', 
-                    fontSize: 14,
-                    fontWeight: 500
+                  fill="#3B82F6"
+                  radius={[0, 4, 4, 0]}
+                  label={{
+                    position: 'insideTopRight',
+                    offset: -10,
+                    fill: 'white',
+                    fontSize: 13,
+                    fontWeight: 600
                   }}
                 />
               </BarChart>
