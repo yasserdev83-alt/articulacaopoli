@@ -174,22 +174,44 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topAgents} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis type="number" />
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart 
+                data={topAgents} 
+                layout="horizontal"
+                margin={{ top: 10, right: 60, left: 20, bottom: 10 }}
+              >
+                <XAxis 
+                  type="number" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                />
                 <YAxis 
                   dataKey="agentName" 
                   type="category" 
-                  width={80}
+                  width={140}
                   fontSize={12}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
                 />
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                />
                 <Bar 
                   dataKey="totalUpdates" 
-                  fill="hsl(var(--primary))"
-                  radius={[0, 4, 4, 0]}
-                  label={{ position: 'right', fill: 'hsl(var(--primary))', fontSize: 12 }}
+                  fill="#60A5FA"
+                  radius={[0, 6, 6, 0]}
+                  label={{ 
+                    position: 'right', 
+                    fill: 'hsl(var(--foreground))', 
+                    fontSize: 14,
+                    fontWeight: 500
+                  }}
                 />
               </BarChart>
             </ResponsiveContainer>
