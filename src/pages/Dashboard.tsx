@@ -23,6 +23,7 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  Cell,
 } from "recharts";
 
 export function Dashboard() {
@@ -126,72 +127,112 @@ export function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Performance Chart */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <Card className="shadow-card border-0 bg-gradient-to-br from-card/50 to-card">
+          <CardHeader className="pb-6">
+            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
               <Calendar className="h-5 w-5 text-primary" />
               Performance Semanal
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={weeklyData}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+          <CardContent className="pt-0">
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart 
+                data={weeklyData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="hsl(var(--border))" 
+                  opacity={0.3}
+                />
                 <XAxis 
                   dataKey="week" 
                   tickFormatter={(value) => new Date(value + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <YAxis />
+                <YAxis 
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <Tooltip 
-                  labelFormatter={(value) => new Date(value + 'T00:00:00').toLocaleDateString('pt-BR')}
+                  labelFormatter={(value) => `Semana de ${new Date(value + 'T00:00:00').toLocaleDateString('pt-BR')}`}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                  }}
                 />
-                {agentPerformance.slice(0, 4).map((agent, index) => (
-                  <Line
-                    key={agent.agentName}
-                    type="monotone"
-                    dataKey={agent.agentName}
-                    stroke={`hsl(${214 + index * 30}, 84%, ${56 + index * 5}%)`}
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    label={{
-                      position: 'top',
-                      fill: `hsl(${214 + index * 30}, 84%, ${56 + index * 5}%)`,
-                      fontSize: 12
-                    }}
-                  />
-                ))}
+                {agentPerformance.slice(0, 4).map((agent, index) => {
+                  const colors = [
+                    'hsl(220, 98%, 61%)', // Blue
+                    'hsl(142, 71%, 45%)', // Green
+                    'hsl(262, 83%, 58%)', // Purple
+                    'hsl(346, 87%, 43%)'  // Red
+                  ];
+                  
+                  return (
+                    <Line
+                      key={agent.agentName}
+                      type="monotone"
+                      dataKey={agent.agentName}
+                      stroke={colors[index]}
+                      strokeWidth={3}
+                      dot={{ 
+                        r: 6, 
+                        fill: colors[index], 
+                        strokeWidth: 2, 
+                        stroke: 'hsl(var(--background))' 
+                      }}
+                      activeDot={{ 
+                        r: 8, 
+                        fill: colors[index],
+                        stroke: 'hsl(var(--background))',
+                        strokeWidth: 2
+                      }}
+                    />
+                  );
+                })}
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Top Performers */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <Card className="shadow-card border-0 bg-gradient-to-br from-card/50 to-card">
+          <CardHeader className="pb-6">
+            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
               <Award className="h-5 w-5 text-primary" />
               Ranking de Produtividade
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <ResponsiveContainer width="100%" height={400}>
               <BarChart 
                 data={topAgents} 
-                layout="horizontal"
-                margin={{ top: 10, right: 80, left: 20, bottom: 10 }}
+                layout="vertical"
+                margin={{ top: 20, right: 60, left: 120, bottom: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.1} />
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="hsl(var(--border))" 
+                  opacity={0.2}
+                  horizontal={false}
+                />
                 <XAxis 
                   type="number" 
                   axisLine={false}
                   tickLine={false}
-                  tick={false}
-                  hide
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  domain={[0, 'dataMax + 20']}
                 />
                 <YAxis 
                   dataKey="agentName" 
                   type="category" 
-                  width={160}
+                  width={100}
                   axisLine={false}
                   tickLine={false}
                   tick={{ 
@@ -205,22 +246,23 @@ export function Dashboard() {
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
                   }}
                   labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  formatter={(value, name) => [
+                    `${value} atualizações`,
+                    'Total'
+                  ]}
                 />
                 <Bar 
                   dataKey="totalUpdates" 
-                  fill="#3B82F6"
-                  radius={[0, 4, 4, 0]}
-                  label={{
-                    position: 'insideTopRight',
-                    offset: -10,
-                    fill: 'white',
-                    fontSize: 13,
-                    fontWeight: 600
-                  }}
-                />
+                  radius={[0, 8, 8, 0]}
+                  maxBarSize={40}
+                >
+                  {topAgents.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={`hsl(${220 - index * 20}, 98%, ${61 + index * 5}%)`} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -228,46 +270,58 @@ export function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <Card className="shadow-card">
-        <CardHeader>
+      <Card className="shadow-card border-0 bg-gradient-to-br from-card/50 to-card">
+        <CardHeader className="pb-6">
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-lg font-semibold">
               <BarChart3 className="h-5 w-5 text-primary" />
               Atividade Recente
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-border/50 hover:bg-muted/50">
               <Filter className="h-4 w-4 mr-2" />
               Filtros
             </Button>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {agentPerformance.slice(0, 6).map((agent, index) => (
-              <div key={agent.agentId} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-sm font-medium text-primary">
-                      {agent.agentName.charAt(0)}
-                    </span>
+        <CardContent className="pt-0">
+          <div className="space-y-3">
+            {agentPerformance.slice(0, 6).map((agent, index) => {
+              const colors = [
+                'hsl(220, 98%, 61%)', // Blue
+                'hsl(142, 71%, 45%)', // Green
+                'hsl(262, 83%, 58%)', // Purple
+                'hsl(346, 87%, 43%)', // Red
+                'hsl(43, 89%, 58%)',  // Yellow
+                'hsl(14, 90%, 53%)'   // Orange
+              ];
+              
+              return (
+                <div key={agent.agentId} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200 border border-border/30">
+                  <div className="flex items-center gap-4">
+                    <div 
+                      className="h-12 w-12 rounded-xl flex items-center justify-center font-semibold text-white shadow-lg"
+                      style={{ backgroundColor: colors[index % colors.length] }}
+                    >
+                      {agent.agentName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{agent.agentName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {agent.weeklyUpdates} atualizações esta semana
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">{agent.agentName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {agent.weeklyUpdates} atualizações esta semana
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-foreground">
+                      {agent.totalUpdates} total
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Última: {new Date(agent.lastUpdate + 'T00:00:00').toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">
-                    {agent.totalUpdates} total
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Última: {new Date(agent.lastUpdate + 'T00:00:00').toLocaleDateString('pt-BR')}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
