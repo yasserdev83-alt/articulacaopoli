@@ -172,7 +172,7 @@ export function useProductivityData() {
   };
 
   const getWeeklyData = () => {
-    const weeklyStats = new Map<string, Map<string, number>>();
+    const weeklyStats = new Map<string, { weekLabel: string, agentData: Map<string, number>, date: Date }>();
     
     records.forEach(record => {
       // Use record.date (data da atualização) e força timezone local
@@ -181,26 +181,44 @@ export function useProductivityData() {
       weekStart.setDate(date.getDate() - date.getDay());
       const weekKey = weekStart.toISOString().split('T')[0];
       
+      // Calcular a semana do mês
+      const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+      const firstWeekStart = new Date(firstDayOfMonth);
+      firstWeekStart.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
+      
+      const weeksDiff = Math.floor((weekStart.getTime() - firstWeekStart.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      const weekOfMonth = Math.max(1, weeksDiff + 1);
+      const weekLabel = `${weekOfMonth}ª semana`;
+      
       if (!weeklyStats.has(weekKey)) {
-        weeklyStats.set(weekKey, new Map());
+        weeklyStats.set(weekKey, { 
+          weekLabel, 
+          agentData: new Map(), 
+          date: weekStart 
+        });
       }
       
       const weekData = weeklyStats.get(weekKey)!;
       const agentName = record.agent?.name || 'Unknown';
-      const current = weekData.get(agentName) || 0;
-      weekData.set(agentName, current + record.updates_count);
+      const current = weekData.agentData.get(agentName) || 0;
+      weekData.agentData.set(agentName, current + record.updates_count);
     });
 
     return Array.from(weeklyStats.entries())
-      .map(([weekKey, agentData]) => {
-        const result: any = { week: weekKey };
+      .map(([weekKey, { weekLabel, agentData, date }]) => {
+        const result: any = { 
+          week: weekKey, 
+          weekLabel,
+          sortDate: date.getTime()
+        };
         agentData.forEach((updates, agentName) => {
           result[agentName] = updates;
         });
         return result;
       })
-      .sort((a, b) => new Date(b.week).getTime() - new Date(a.week).getTime())
-      .slice(0, 8);
+      .sort((a, b) => b.sortDate - a.sortDate)
+      .slice(0, 8)
+      .reverse(); // Para mostrar em ordem crescente
   };
 
   return {

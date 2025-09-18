@@ -146,8 +146,7 @@ export function Dashboard() {
                   opacity={0.3}
                 />
                 <XAxis 
-                  dataKey="week" 
-                  tickFormatter={(value) => new Date(value + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                  dataKey="weekLabel" 
                   tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                   axisLine={false}
                   tickLine={false}
@@ -158,7 +157,7 @@ export function Dashboard() {
                   tickLine={false}
                 />
                 <Tooltip 
-                  labelFormatter={(value) => `Semana de ${new Date(value + 'T00:00:00').toLocaleDateString('pt-BR')}`}
+                  labelFormatter={(value) => value}
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
@@ -181,6 +180,7 @@ export function Dashboard() {
                       dataKey={agent.agentName}
                       stroke={colors[index]}
                       strokeWidth={3}
+                      connectNulls={false}
                       dot={{ 
                         r: 6, 
                         fill: colors[index], 
