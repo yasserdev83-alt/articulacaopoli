@@ -151,7 +151,7 @@ export function useProductivityData() {
       
       // Use sempre o record.date (data da atualização) para lastUpdate
       if (!current.lastUpdateDate || record.date > current.lastUpdateDate) {
-        current.lastUpdate = record.updated_at || record.created_at;
+        current.lastUpdate = record.date; // Use diretamente a data da atualização
         current.lastUpdateDate = record.date;
       }
 

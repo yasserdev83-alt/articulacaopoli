@@ -250,7 +250,7 @@ export function Equipe() {
                 {/* Last Update */}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
                   <Calendar className="h-3 w-3" />
-                  <span>Última atualização: {new Date(agent.lastUpdate).toLocaleDateString('pt-BR')}</span>
+                  <span>Última atualização: {new Date(agent.lastUpdate + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
                 </div>
 
                 {/* Action Button */}
