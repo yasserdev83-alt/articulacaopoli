@@ -63,7 +63,8 @@ export function AppSidebar() {
                 AgentMetrics
               </h1>
               <p className="text-xs text-sidebar-foreground/60">
-                Sistema de Produtividade
+                Sistema de Produtividade<br />
+                By DPGE
               </p>
             </div>
           )}

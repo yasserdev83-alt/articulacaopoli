@@ -88,47 +88,59 @@ export function Dashboard() {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Total de Atualizações"
-          value={metrics.totalUpdates.toLocaleString()}
-          description={
-            selectedPeriod === 'week' ? 'Esta semana' : 
-            selectedPeriod === 'month' ? 'Este mês' : 
-            'Este trimestre'
-          }
-          icon={BarChart3}
-          trend={{ value: 12, isPositive: true }}
-        />
-        <MetricCard
-          title="Agentes Ativos"
-          value={metrics.totalAgents}
-          description="Participando ativamente"
-          icon={Users}
-          trend={{ value: 8, isPositive: true }}
-        />
-        <MetricCard
-          title="Média por Agente"
-          value={metrics.averageUpdatesPerAgent}
-          description={
-            selectedPeriod === 'week' ? 'Atualizações/semana' : 
-            selectedPeriod === 'month' ? 'Atualizações/mês' : 
-            'Atualizações/trimestre'
-          }
-          icon={TrendingUp}
-          trend={{ value: 5, isPositive: true }}
-        />
-        <MetricCard
-          title="Top Performer"
-          value={metrics.topPerformer.agentName}
-          description={`${metrics.topPerformer.updatesCount} atualizações`}
-          icon={Award}
-        />
+        <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
+          <MetricCard
+            title="Total de Atualizações"
+            value={metrics.totalUpdates.toLocaleString()}
+            description={
+              selectedPeriod === 'week' ? 'Esta semana' : 
+              selectedPeriod === 'month' ? 'Este mês' : 
+              'Este trimestre'
+            }
+            icon={BarChart3}
+            trend={{ value: 12, isPositive: true }}
+            className="bg-transparent border-0 shadow-none"
+          />
+        </div>
+        <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
+          <MetricCard
+            title="Agentes Ativos"
+            value={metrics.totalAgents}
+            description="Participando ativamente"
+            icon={Users}
+            trend={{ value: 8, isPositive: true }}
+            className="bg-transparent border-0 shadow-none"
+          />
+        </div>
+        <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
+          <MetricCard
+            title="Média por Agente"
+            value={metrics.averageUpdatesPerAgent}
+            description={
+              selectedPeriod === 'week' ? 'Atualizações/semana' : 
+              selectedPeriod === 'month' ? 'Atualizações/mês' : 
+              'Atualizações/trimestre'
+            }
+            icon={TrendingUp}
+            trend={{ value: 5, isPositive: true }}
+            className="bg-transparent border-0 shadow-none"
+          />
+        </div>
+        <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
+          <MetricCard
+            title="Top Performer"
+            value={metrics.topPerformer.agentName}
+            description={`${metrics.topPerformer.updatesCount} atualizações`}
+            icon={Award}
+            className="bg-transparent border-0 shadow-none"
+          />
+        </div>
       </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Performance Chart */}
-        <Card className="shadow-card border-0 bg-gradient-to-br from-card/50 to-card">
+        <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
           <CardHeader className="pb-6">
             <CardTitle className="flex items-center gap-2 text-lg font-semibold">
               <Calendar className="h-5 w-5 text-primary" />
@@ -190,7 +202,7 @@ export function Dashboard() {
         </Card>
 
         {/* Top Performers */}
-        <Card className="shadow-card border-0 bg-gradient-to-br from-card/50 to-card">
+        <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
           <CardHeader className="pb-6">
             <CardTitle className="flex items-center gap-2 text-lg font-semibold">
               <Award className="h-5 w-5 text-primary" />
@@ -258,7 +270,7 @@ export function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <Card className="shadow-card border-0 bg-gradient-to-br from-card/50 to-card">
+      <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
         <CardHeader className="pb-6">
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-lg font-semibold">
@@ -284,7 +296,7 @@ export function Dashboard() {
               ];
               
               return (
-                <div key={agent.agentId} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200 border border-border/30">
+                <div key={agent.agentId} className="flex items-center justify-between p-4 rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10">
                   <div className="flex items-center gap-4">
                     <div 
                       className="h-12 w-12 rounded-xl flex items-center justify-center font-semibold text-white shadow-lg"

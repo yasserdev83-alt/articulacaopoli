@@ -79,7 +79,11 @@ export function AgentDetails({ agent, trigger }: AgentDetailsProps) {
 
   const totalRecords = agentRecords.length;
   const averageUpdatesPerRecord = totalRecords > 0 ? Math.round(agent.totalUpdates / totalRecords) : 0;
-  const lastRecord = agentRecords.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  // Pick the record with the greatest 'date' (yyyy-MM-dd) without relying on UTC parsing
+  const lastRecord = agentRecords.reduce<ProductivityRecord | undefined>((latest, current) => {
+    if (!latest) return current;
+    return current.date > latest.date ? current : latest;
+  }, undefined);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -90,7 +90,7 @@ export function Equipe() {
       </div>
 
       {/* Filters */}
-      <Card className="shadow-card">
+      <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
@@ -133,7 +133,7 @@ export function Equipe() {
 
       {/* Team Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="shadow-card">
+        <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -147,7 +147,7 @@ export function Equipe() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
+        <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center">
@@ -163,7 +163,7 @@ export function Equipe() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
+        <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center">
@@ -185,7 +185,7 @@ export function Equipe() {
           const trend = getPerformanceTrend(agent);
           
           return (
-            <Card key={agent.agentId} className="shadow-card hover:shadow-lg transition-all duration-300">
+            <Card key={agent.agentId} className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl hover:shadow-2xl hover:bg-white/15 transition-all duration-300">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -223,11 +223,11 @@ export function Equipe() {
               <CardContent className="space-y-4">
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-center p-3 rounded-lg backdrop-blur-sm bg-white/5 border border-white/10">
                     <p className="text-2xl font-bold text-primary">{agent.totalUpdates}</p>
                     <p className="text-xs text-muted-foreground">Total</p>
                   </div>
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-center p-3 rounded-lg backdrop-blur-sm bg-white/5 border border-white/10">
                     <p className="text-2xl font-bold text-primary">{agent.weeklyUpdates}</p>
                     <p className="text-xs text-muted-foreground">Esta Semana</p>
                   </div>

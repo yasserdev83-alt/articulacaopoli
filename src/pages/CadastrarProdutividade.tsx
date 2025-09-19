@@ -55,7 +55,8 @@ export function CadastrarProdutividade() {
         agent_id: formData.agentId,
         leadership_role_id: formData.leadershipRoleId,
         updates_count: updatesCount,
-        date: formData.date.toISOString().split('T')[0],
+        // Use local date to avoid timezone shifting (e.g., UTC-3)
+        date: format(formData.date, 'yyyy-MM-dd'),
       });
 
       if (result.success) {
@@ -108,7 +109,7 @@ export function CadastrarProdutividade() {
       </div>
 
       {/* Form */}
-      <Card className="shadow-card">
+      <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
         <CardHeader>
           <CardTitle className="text-xl">Dados de Produtividade</CardTitle>
         </CardHeader>
@@ -237,7 +238,7 @@ export function CadastrarProdutividade() {
       </Card>
 
       {/* Quick Actions */}
-      <Card className="shadow-card">
+      <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
         <CardHeader>
           <CardTitle className="text-lg">Ações Rápidas</CardTitle>
         </CardHeader>
