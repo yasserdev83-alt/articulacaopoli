@@ -8,6 +8,9 @@ import { Layout } from "@/components/Layout";
 import { Dashboard } from "@/pages/Dashboard";
 import { CadastrarProdutividade } from "@/pages/CadastrarProdutividade";
 import { Equipe } from "@/pages/Equipe";
+import { Login } from "@/pages/Login";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -16,19 +19,38 @@ const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <TooltipProvider delayDuration={0} skipDelayDuration={300}>
-          <Layout>
+        <AuthProvider>
+          <TooltipProvider delayDuration={0} skipDelayDuration={300}>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/cadastrar" element={<CadastrarProdutividade />} />
-              <Route path="/equipe" element={<Equipe />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/cadastrar" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <CadastrarProdutividade />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/equipe" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Equipe />
+                  </Layout>
+                </ProtectedRoute>
+              } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </Layout>
-          <Toaster />
-          <Sonner />
-        </TooltipProvider>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>
