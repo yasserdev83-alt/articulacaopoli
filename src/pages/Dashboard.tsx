@@ -137,7 +137,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent className="pt-0">
             <ResponsiveContainer width="100%" height={350}>
-              <LineChart 
+              <BarChart 
                 data={weeklyData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
@@ -175,29 +175,16 @@ export function Dashboard() {
                   ];
                   
                   return (
-                    <Line
+                    <Bar
                       key={agent.agentName}
-                      type="monotone"
                       dataKey={agent.agentName}
-                      stroke={colors[index]}
-                      strokeWidth={4}
-                      connectNulls={true}
-                      dot={{ 
-                        r: 8, 
-                        fill: colors[index], 
-                        strokeWidth: 3, 
-                        stroke: 'hsl(var(--background))' 
-                      }}
-                      activeDot={{ 
-                        r: 10, 
-                        fill: colors[index],
-                        stroke: 'hsl(var(--background))',
-                        strokeWidth: 3
-                      }}
+                      fill={colors[index]}
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={60}
                     />
                   );
                 })}
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
