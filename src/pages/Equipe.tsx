@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProductivityData } from "@/hooks/useProductivityData";
+import { AgentDetails } from "@/components/AgentDetails";
 import { 
   Users, 
   Search, 
@@ -254,9 +255,14 @@ export function Equipe() {
                 </div>
 
                 {/* Action Button */}
-                <Button variant="outline" size="sm" className="w-full">
-                  Ver Detalhes
-                </Button>
+                <AgentDetails 
+                  agent={agent}
+                  trigger={
+                    <Button variant="outline" size="sm" className="w-full">
+                      Ver Detalhes
+                    </Button>
+                  }
+                />
               </CardContent>
             </Card>
           );
