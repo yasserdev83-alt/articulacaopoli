@@ -118,7 +118,7 @@ export function useProductivityData() {
     };
   };
 
-  const getAgentPerformance = (): AgentPerformance[] => {
+  const getAgentPerformance = (agentId?: string): AgentPerformance[] => {
     const agentStats = new Map<string, {
       totalUpdates: number;
       weeklyUpdates: number;
@@ -130,7 +130,11 @@ export function useProductivityData() {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
 
-    records.forEach(record => {
+    const filteredRecords = records.filter(record => {
+      return !agentId || record.agent_id === agentId;
+    });
+
+    filteredRecords.forEach(record => {
       // Use record.date (data da atualização) para comparações
       const recordDate = new Date(record.date + 'T00:00:00'); // Força timezone local
       const agentName = record.agent?.name || 'Unknown';
@@ -171,10 +175,14 @@ export function useProductivityData() {
     }).sort((a, b) => b.totalUpdates - a.totalUpdates);
   };
 
-  const getWeeklyData = () => {
+  const getWeeklyData = (agentId?: string) => {
     const weeklyStats = new Map<string, { weekLabel: string, agentData: Map<string, number>, date: Date }>();
     
-    records.forEach(record => {
+    const filteredRecords = records.filter(record => {
+      return !agentId || record.agent_id === agentId;
+    });
+    
+    filteredRecords.forEach(record => {
       // Use record.date (data da atualização) e força timezone local
       const date = new Date(record.date + 'T00:00:00');
       const weekStart = new Date(date);

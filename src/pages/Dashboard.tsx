@@ -39,9 +39,10 @@ export function Dashboard() {
     );
   }
 
-  const metrics = getMetrics(selectedPeriod, selectedAgent === 'all' ? undefined : selectedAgent);
-  const agentPerformance = getAgentPerformance();
-  const weeklyData = getWeeklyData();
+  const agentFilter = selectedAgent === 'all' ? undefined : selectedAgent;
+  const metrics = getMetrics(selectedPeriod, agentFilter);
+  const agentPerformance = getAgentPerformance(agentFilter);
+  const weeklyData = getWeeklyData(agentFilter);
 
   const topAgents = agentPerformance.slice(0, 5);
 
@@ -165,7 +166,7 @@ export function Dashboard() {
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
                   }}
                 />
-                {agentPerformance.slice(0, 4).map((agent, index) => {
+                {agentPerformance.slice(0, selectedAgent === 'all' ? 4 : 1).map((agent, index) => {
                   const colors = [
                     'hsl(220, 98%, 61%)', // Blue
                     'hsl(142, 71%, 45%)', // Green
@@ -179,19 +180,19 @@ export function Dashboard() {
                       type="monotone"
                       dataKey={agent.agentName}
                       stroke={colors[index]}
-                      strokeWidth={3}
-                      connectNulls={false}
+                      strokeWidth={4}
+                      connectNulls={true}
                       dot={{ 
-                        r: 6, 
+                        r: 8, 
                         fill: colors[index], 
-                        strokeWidth: 2, 
+                        strokeWidth: 3, 
                         stroke: 'hsl(var(--background))' 
                       }}
                       activeDot={{ 
-                        r: 8, 
+                        r: 10, 
                         fill: colors[index],
                         stroke: 'hsl(var(--background))',
-                        strokeWidth: 2
+                        strokeWidth: 3
                       }}
                     />
                   );
