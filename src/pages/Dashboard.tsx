@@ -3,16 +3,21 @@ import { MetricCard } from "@/components/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useProductivityData } from "@/hooks/useProductivityData";
 import { 
   BarChart3, 
   Users, 
   TrendingUp, 
   Award,
-  Calendar,
+  Calendar as CalendarIcon,
   Filter,
   UserCheck
 } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import {
   BarChart,
   Bar,
@@ -30,6 +35,14 @@ export function Dashboard() {
   const { getMetrics, getAgentPerformance, getWeeklyData, loading, agents } = useProductivityData();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter'>('week');
   const [selectedAgent, setSelectedAgent] = useState<string>('all');
+  const [dateRange, setDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
+    from: undefined,
+    to: undefined,
+  });
+  const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
   
   if (loading) {
     return (
@@ -40,9 +53,15 @@ export function Dashboard() {
   }
 
   const agentFilter = selectedAgent === 'all' ? undefined : selectedAgent;
-  const metrics = getMetrics(selectedPeriod, agentFilter);
-  const agentPerformance = getAgentPerformance(agentFilter);
-  const weeklyData = getWeeklyData(agentFilter);
+  const metrics = getMetrics(selectedPeriod, agentFilter, dateRange);
+  const agentPerformance = getAgentPerformance(agentFilter, dateRange);
+  
+  // Create month-based date range for weekly chart
+  const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+  const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+  const monthlyDateRange = { from: monthStart, to: monthEnd };
+  
+  const weeklyData = getWeeklyData(agentFilter, monthlyDateRange);
 
   const topAgents = agentPerformance.slice(0, 5);
 
@@ -57,7 +76,74 @@ export function Dashboard() {
           </p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {/* Date Range Filter */}
+          <div className="flex gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-48 justify-start text-left font-normal",
+                    !dateRange.from && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateRange.from ? (
+                    format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
+                  ) : (
+                    <span>Data de início</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 z-50" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateRange.from}
+                  onSelect={(date) => setDateRange(prev => ({ ...prev, from: date }))}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-48 justify-start text-left font-normal",
+                    !dateRange.to && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateRange.to ? (
+                    format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })
+                  ) : (
+                    <span>Data de fim</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 z-50" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateRange.to}
+                  onSelect={(date) => setDateRange(prev => ({ ...prev, to: date }))}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            {(dateRange.from || dateRange.to) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDateRange({ from: undefined, to: undefined })}
+              >
+                Limpar
+              </Button>
+            )}
+          </div>
+
           <Select value={selectedAgent} onValueChange={setSelectedAgent}>
             <SelectTrigger className="w-48">
               <UserCheck className="h-4 w-4 mr-2" />
@@ -142,62 +228,105 @@ export function Dashboard() {
         {/* Weekly Performance Chart */}
         <Card className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl">
           <CardHeader className="pb-6">
-            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-              <Calendar className="h-5 w-5 text-primary" />
-              Performance Semanal
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                <BarChart3 className="h-5 w-5 text-primary" />
+                Performance Semanal
+              </CardTitle>
+              
+              {/* Month Filter */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const prevMonth = new Date(selectedMonth);
+                    prevMonth.setMonth(prevMonth.getMonth() - 1);
+                    setSelectedMonth(prevMonth);
+                  }}
+                >
+                  ←
+                </Button>
+                
+                <div className="text-sm font-medium min-w-[120px] text-center">
+                  {format(selectedMonth, "MMMM yyyy", { locale: ptBR })}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const nextMonth = new Date(selectedMonth);
+                    nextMonth.setMonth(nextMonth.getMonth() + 1);
+                    setSelectedMonth(nextMonth);
+                  }}
+                >
+                  →
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart 
-                data={weeklyData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-              >
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="hsl(var(--border))" 
-                  opacity={0.3}
-                />
-                <XAxis 
-                  dataKey="weekLabel" 
-                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis 
-                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip 
-                  labelFormatter={(value) => value}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-                  }}
-                />
-                {agentPerformance.slice(0, selectedAgent === 'all' ? 4 : 1).map((agent, index) => {
-                  const colors = [
-                    'hsl(220, 98%, 61%)', // Blue
-                    'hsl(142, 71%, 45%)', // Green
-                    'hsl(262, 83%, 58%)', // Purple
-                    'hsl(346, 87%, 43%)'  // Red
-                  ];
-                  
-                  return (
-                    <Bar
-                      key={agent.agentName}
-                      dataKey={agent.agentName}
-                      fill={colors[index]}
-                      radius={[4, 4, 0, 0]}
-                      maxBarSize={60}
-                    />
-                  );
-                })}
-              </BarChart>
-            </ResponsiveContainer>
+            {weeklyData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart 
+                  data={weeklyData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="hsl(var(--border))" 
+                    opacity={0.3}
+                  />
+                  <XAxis 
+                    dataKey="weekLabel" 
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip 
+                    labelFormatter={(value) => value}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                    }}
+                  />
+                  {agentPerformance.slice(0, selectedAgent === 'all' ? 4 : 1).map((agent, index) => {
+                    const colors = [
+                      'hsl(220, 98%, 61%)', // Blue
+                      'hsl(142, 71%, 45%)', // Green
+                      'hsl(262, 83%, 58%)', // Purple
+                      'hsl(346, 87%, 43%)'  // Red
+                    ];
+                    
+                    return (
+                      <Bar
+                        key={agent.agentName}
+                        dataKey={agent.agentName}
+                        fill={colors[index]}
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={60}
+                      />
+                    );
+                  })}
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[350px] text-muted-foreground">
+                <div className="text-center">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Nenhum dado encontrado para este mês</p>
+                  <p className="text-sm">Selecione outro mês ou adicione dados de produtividade</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

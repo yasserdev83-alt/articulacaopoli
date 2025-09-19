@@ -69,28 +69,38 @@ export function useProductivityData() {
     }
   };
 
-  const getMetrics = (period: 'week' | 'month' | 'quarter' = 'week', agentId?: string): DashboardMetrics => {
+  const getMetrics = (period: 'week' | 'month' | 'quarter' = 'week', agentId?: string, dateRange?: { from?: Date; to?: Date }): DashboardMetrics => {
     const now = new Date();
     let startDate = new Date();
+    let endDate = new Date();
     
-    switch (period) {
-      case 'week':
-        startDate.setDate(now.getDate() - now.getDay());
-        break;
-      case 'month':
-        startDate.setDate(1);
-        break;
-      case 'quarter':
-        const currentQuarter = Math.floor(now.getMonth() / 3);
-        startDate.setMonth(currentQuarter * 3, 1);
-        break;
+    // Use custom date range if provided, otherwise use period-based filtering
+    if (dateRange?.from || dateRange?.to) {
+      startDate = dateRange.from || new Date(0); // Use epoch if no start date
+      endDate = dateRange.to || new Date(); // Use now if no end date
+    } else {
+      // Default period-based filtering
+      switch (period) {
+        case 'week':
+          startDate.setDate(now.getDate() - now.getDay());
+          break;
+        case 'month':
+          startDate.setDate(1);
+          break;
+        case 'quarter':
+          const currentQuarter = Math.floor(now.getMonth() / 3);
+          startDate.setMonth(currentQuarter * 3, 1);
+          break;
+      }
     }
+    
     startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
 
     const filteredRecords = records.filter(record => {
       // Use record.date (data da atualização) e força timezone local
       const recordDate = new Date(record.date + 'T00:00:00');
-      const dateMatches = recordDate >= startDate;
+      const dateMatches = recordDate >= startDate && recordDate <= endDate;
       const agentMatches = !agentId || record.agent_id === agentId;
       return dateMatches && agentMatches;
     });
@@ -118,7 +128,7 @@ export function useProductivityData() {
     };
   };
 
-  const getAgentPerformance = (agentId?: string): AgentPerformance[] => {
+  const getAgentPerformance = (agentId?: string, dateRange?: { from?: Date; to?: Date }): AgentPerformance[] => {
     const agentStats = new Map<string, {
       totalUpdates: number;
       weeklyUpdates: number;
@@ -130,8 +140,23 @@ export function useProductivityData() {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
 
+    // Apply date range filtering if provided
+    let startDate = new Date(0);
+    let endDate = new Date();
+    
+    if (dateRange?.from || dateRange?.to) {
+      startDate = dateRange.from || new Date(0);
+      endDate = dateRange.to || new Date();
+    }
+    
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
     const filteredRecords = records.filter(record => {
-      return !agentId || record.agent_id === agentId;
+      const recordDate = new Date(record.date + 'T00:00:00');
+      const dateMatches = recordDate >= startDate && recordDate <= endDate;
+      const agentMatches = !agentId || record.agent_id === agentId;
+      return dateMatches && agentMatches;
     });
 
     filteredRecords.forEach(record => {
@@ -175,11 +200,26 @@ export function useProductivityData() {
     }).sort((a, b) => b.totalUpdates - a.totalUpdates);
   };
 
-  const getWeeklyData = (agentId?: string) => {
+  const getWeeklyData = (agentId?: string, dateRange?: { from?: Date; to?: Date }) => {
     const weeklyStats = new Map<string, { weekLabel: string, agentData: Map<string, number>, date: Date }>();
     
+    // Apply date range filtering if provided
+    let startDate = new Date(0);
+    let endDate = new Date();
+    
+    if (dateRange?.from || dateRange?.to) {
+      startDate = dateRange.from || new Date(0);
+      endDate = dateRange.to || new Date();
+    }
+    
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
     const filteredRecords = records.filter(record => {
-      return !agentId || record.agent_id === agentId;
+      const recordDate = new Date(record.date + 'T00:00:00');
+      const dateMatches = recordDate >= startDate && recordDate <= endDate;
+      const agentMatches = !agentId || record.agent_id === agentId;
+      return dateMatches && agentMatches;
     });
     
     filteredRecords.forEach(record => {
@@ -217,16 +257,18 @@ export function useProductivityData() {
         const result: any = { 
           week: weekKey, 
           weekLabel,
-          sortDate: date.getTime()
+          sortDate: date.getTime(),
+          totalUpdates: 0
         };
         agentData.forEach((updates, agentName) => {
           result[agentName] = updates;
+          result.totalUpdates += updates;
         });
         return result;
       })
-      .sort((a, b) => b.sortDate - a.sortDate)
-      .slice(0, 8)
-      .reverse(); // Para mostrar em ordem crescente
+      .filter(week => week.totalUpdates > 0) // Only show weeks with data
+      .sort((a, b) => a.sortDate - b.sortDate) // Sort chronologically
+      .slice(0, 6); // Limit to 6 weeks max
   };
 
   return {

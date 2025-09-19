@@ -78,14 +78,14 @@ EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Insert default agents
 INSERT INTO public.agents (name) VALUES
-  ('Ana Silva'),
-  ('Carlos Santos'),
-  ('Maria Oliveira'),
-  ('João Pereira'),
-  ('Fernanda Costa'),
-  ('Ricardo Lima'),
-  ('Juliana Moraes'),
-  ('Pedro Alves');
+  ('Monica'),
+  ('Marina'),
+  ('Ana Paula'),
+  ('Elisangela'),
+  ('Karla'),
+  ('Jessica'),
+  ('Silvana'),
+  ('Rosa Maria');
 
 -- Insert default leadership roles
 INSERT INTO public.leadership_roles (name) VALUES
